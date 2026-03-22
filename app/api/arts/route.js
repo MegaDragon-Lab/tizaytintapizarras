@@ -1,7 +1,6 @@
 import { Redis } from '@upstash/redis';
 import { put } from '@vercel/blob';
 
-// Upstash via Vercel KV-compatible env vars
 const redis = new Redis({
   url: process.env.KV_REST_API_URL,
   token: process.env.KV_REST_API_TOKEN,
@@ -20,18 +19,25 @@ export async function GET() {
 export async function POST(request) {
   try {
     const formData = await request.formData();
-    const file  = formData.get('file');
-    const title = formData.get('title');
-    const desc  = formData.get('desc') || '';
-    const wa    = formData.get('wa');
+    const file    = formData.get('file');
+    const video   = formData.get('video');   // optional
+    const title   = formData.get('title');
+    const desc    = formData.get('desc') || '';
+    const wa      = formData.get('wa');
 
     if (!file || !title || !wa) {
       return Response.json({ error: 'Faltan campos requeridos' }, { status: 400 });
     }
 
-    const blob = await put(`arts/${Date.now()}-${file.name}`, file, {
-      access: 'public',
-    });
+    // Upload image
+    const blob = await put(`arts/${Date.now()}-${file.name}`, file, { access: 'public' });
+
+    // Upload video if provided
+    let videoUrl = null;
+    if (video && video.size > 0) {
+      const vBlob = await put(`arts/videos/${Date.now()}-${video.name}`, video, { access: 'public' });
+      videoUrl = vBlob.url;
+    }
 
     const art = {
       id: Date.now(),
@@ -39,11 +45,11 @@ export async function POST(request) {
       desc,
       wa,
       imgUrl: blob.url,
+      videoUrl,
       createdAt: new Date().toISOString(),
     };
 
     await redis.lpush('arts', art);
-
     return Response.json(art, { status: 201 });
   } catch (error) {
     console.error('POST /api/arts error:', error);

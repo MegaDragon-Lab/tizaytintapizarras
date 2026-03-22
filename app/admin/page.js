@@ -12,6 +12,8 @@ export default function AdminPage() {
   const [file, setFile] = useState(null);
   const [previewSrc, setPreviewSrc] = useState(null);
   const [previewName, setPreviewName] = useState('');
+  const [video, setVideo] = useState(null);
+  const [videoName, setVideoName] = useState('');
   const [publishing, setPublishing] = useState(false);
   const [progress, setProgress] = useState(0);
   const [toast, setToast] = useState({ msg: '', type: 'ok', visible: false });
@@ -23,11 +25,16 @@ export default function AdminPage() {
   const [editDesc, setEditDesc] = useState('');
   const [editFile, setEditFile] = useState(null);
   const [editPreview, setEditPreview] = useState(null);
+  const [editVideo, setEditVideo] = useState(null);
+  const [editVideoName, setEditVideoName] = useState('');
+  const [removeVideo, setRemoveVideo] = useState(false);
   const [saving, setSaving] = useState(false);
 
   const fileInputRef = useRef();
+  const videoInputRef = useRef();
   const dropRef = useRef();
   const editFileRef = useRef();
+  const editVideoRef = useRef();
   const router = useRouter();
 
   useEffect(() => {
@@ -41,10 +48,8 @@ export default function AdminPage() {
 
   async function fetchArts() {
     setLoading(true);
-    try {
-      const res = await fetch('/api/arts');
-      setArts(await res.json());
-    } catch { setArts([]); }
+    try { const res = await fetch('/api/arts'); setArts(await res.json()); }
+    catch { setArts([]); }
     setLoading(false);
   }
 
@@ -58,6 +63,12 @@ export default function AdminPage() {
     if (f.size > 10 * 1024 * 1024) { showToast('Imagen muy grande — máx 10 MB', 'error'); return; }
     setFile(f); setPreviewName(f.name);
     const r = new FileReader(); r.onload = e => setPreviewSrc(e.target.result); r.readAsDataURL(f);
+  }
+
+  function handleVideo(f) {
+    if (!f) return;
+    if (f.size > 100 * 1024 * 1024) { showToast('Video muy grande — máx 100 MB', 'error'); return; }
+    setVideo(f); setVideoName(f.name);
   }
 
   function clearFile(e) {
@@ -80,8 +91,11 @@ export default function AdminPage() {
     localStorage.setItem('ttWa', waNumber.trim());
     try {
       const fd = new FormData();
-      fd.append('file', file); fd.append('title', title.trim());
-      fd.append('desc', desc.trim()); fd.append('wa', waNumber.replace(/\s+/g, ''));
+      fd.append('file', file);
+      fd.append('title', title.trim());
+      fd.append('desc', desc.trim());
+      fd.append('wa', waNumber.replace(/\s+/g, ''));
+      if (video) fd.append('video', video);
       setProgress(50);
       const res = await fetch('/api/arts', { method: 'POST', body: fd });
       setProgress(90);
@@ -89,7 +103,9 @@ export default function AdminPage() {
       const newArt = await res.json();
       setArts(prev => [newArt, ...prev]);
       setTitle(''); setDesc(''); setFile(null); setPreviewSrc(null); setPreviewName('');
+      setVideo(null); setVideoName('');
       if (fileInputRef.current) fileInputRef.current.value = '';
+      if (videoInputRef.current) videoInputRef.current.value = '';
       setProgress(100); setTimeout(() => setProgress(0), 600);
       showToast('Obra publicada');
     } catch { showToast('Error al publicar. Intenta de nuevo.', 'error'); setProgress(0); }
@@ -123,13 +139,7 @@ export default function AdminPage() {
   function openEdit(art) {
     setEditArt(art); setEditTitle(art.title); setEditDesc(art.desc || '');
     setEditFile(null); setEditPreview(null);
-  }
-
-  function handleEditFile(f) {
-    if (!f) return;
-    if (f.size > 10 * 1024 * 1024) { showToast('Imagen muy grande — máx 10 MB', 'error'); return; }
-    setEditFile(f);
-    const r = new FileReader(); r.onload = e => setEditPreview(e.target.result); r.readAsDataURL(f);
+    setEditVideo(null); setEditVideoName(''); setRemoveVideo(false);
   }
 
   async function saveEdit() {
@@ -140,6 +150,8 @@ export default function AdminPage() {
       fd.append('title', editTitle.trim());
       fd.append('desc', editDesc.trim());
       if (editFile) fd.append('file', editFile);
+      if (editVideo) fd.append('video', editVideo);
+      if (removeVideo) fd.append('removeVideo', 'true');
       const res = await fetch(`/api/arts/${editArt.id}`, { method: 'PATCH', body: fd });
       if (!res.ok) throw new Error();
       const updated = await res.json();
@@ -162,7 +174,11 @@ export default function AdminPage() {
       <div id="cursor" className={hover ? 'hover' : ''} style={{ left: cursorPos.x, top: cursorPos.y }} />
 
       <header className="top-bar">
-        <span style={{display:"flex",alignItems:"center",gap:12}}><img src="/logo.jpg" alt="Logo" style={{width:38,height:38,borderRadius:"50%",objectFit:"cover",border:"1px solid rgba(250,250,249,.2)"}}/><span className="nav-brand">Tiza &amp; Tinta — Pizarras</span></span>
+        <span style={{display:'flex',alignItems:'center',gap:12}}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo.jpg" alt="Logo" style={{width:38,height:38,borderRadius:'50%',objectFit:'cover',border:'1px solid rgba(250,250,249,.2)'}}/>
+          <span className="nav-brand">Tiza &amp; Tinta — Pizarras</span>
+        </span>
         <span className="nav-tagline">Panel del artista</span>
         <div style={{ display: 'flex', gap: 8 }}>
           <Link className="nav-action" href="/" {...h}>← Ver galería</Link>
@@ -194,6 +210,8 @@ export default function AdminPage() {
             <input type="text" className="field-input" id="desc" placeholder="Dimensiones, técnica, materiales..."
               value={desc} onChange={e => setDesc(e.target.value)} {...h} />
           </div>
+
+          {/* IMAGE */}
           <div className="field">
             <label className="field-label">Fotografía</label>
             <div ref={dropRef} className="drop-zone"
@@ -216,6 +234,26 @@ export default function AdminPage() {
             <input type="file" ref={fileInputRef} accept="image/*" style={{ display: 'none' }}
               onChange={e => handleFile(e.target.files[0])} />
           </div>
+
+          {/* VIDEO */}
+          <div className="field">
+            <label className="field-label">Video del proceso <span style={{ opacity: .5 }}>(opcional)</span></label>
+            <div className="drop-zone" onClick={() => videoInputRef.current?.click()} {...h}>
+              <div className="drop-icon-wrap">🎬</div>
+              <p className="drop-text">{videoName || 'Pulsa para seleccionar video'}</p>
+              <p className="drop-sub">MP4 · MOV · WEBM · Máx 100 MB</p>
+            </div>
+            {videoName && (
+              <div className="preview-strip visible">
+                <span style={{ fontSize: '1.4rem' }}>🎬</span>
+                <span className="preview-name">{videoName}</span>
+                <button className="preview-clear" onClick={() => { setVideo(null); setVideoName(''); videoInputRef.current.value = ''; }} {...h}>✕</button>
+              </div>
+            )}
+            <input type="file" ref={videoInputRef} accept="video/*" style={{ display: 'none' }}
+              onChange={e => handleVideo(e.target.files[0])} />
+          </div>
+
           <div className={`upload-progress${progress > 0 ? ' visible' : ''}`}>
             <div className="upload-progress-bar" style={{ width: `${progress}%` }} />
           </div>
@@ -244,6 +282,7 @@ export default function AdminPage() {
                     <p className="manage-name">
                       {art.title}
                       {art.sold && <span className="sold-tag">Vendida</span>}
+                      {art.videoUrl && <span className="video-tag">🎬</span>}
                     </p>
                     <p className="manage-meta">{art.desc || '—'}</p>
                   </div>
@@ -290,9 +329,7 @@ export default function AdminPage() {
                 <label className="field-label">Cambiar foto <span style={{ opacity: .5 }}>(opcional)</span></label>
                 <div className="drop-zone" onClick={() => editFileRef.current?.click()} {...h}>
                   <div className="drop-icon-wrap">📷</div>
-                  <p className="drop-text">
-                    {editPreview ? 'Nueva foto seleccionada' : 'Pulsa para cambiar la foto'}
-                  </p>
+                  <p className="drop-text">{editPreview ? 'Nueva foto seleccionada' : 'Pulsa para cambiar la foto'}</p>
                 </div>
                 {editPreview && (
                   <div className="preview-strip visible" style={{ marginTop: 7 }}>
@@ -302,7 +339,33 @@ export default function AdminPage() {
                   </div>
                 )}
                 <input type="file" ref={editFileRef} accept="image/*" style={{ display: 'none' }}
-                  onChange={e => handleEditFile(e.target.files[0])} />
+                  onChange={e => { const f = e.target.files[0]; if (!f) return; setEditFile(f); const r = new FileReader(); r.onload = ev => setEditPreview(ev.target.result); r.readAsDataURL(f); }} />
+              </div>
+              <div className="field">
+                <label className="field-label">
+                  {editArt.videoUrl ? 'Cambiar video' : 'Añadir video del proceso'}
+                  <span style={{ opacity: .5 }}> (opcional)</span>
+                </label>
+                <div className="drop-zone" onClick={() => editVideoRef.current?.click()} {...h}>
+                  <div className="drop-icon-wrap">🎬</div>
+                  <p className="drop-text">{editVideoName || (editArt.videoUrl ? 'Video actual · pulsa para cambiar' : 'Pulsa para añadir video')}</p>
+                  <p className="drop-sub">MP4 · MOV · WEBM · Máx 100 MB</p>
+                </div>
+                {editVideoName && (
+                  <div className="preview-strip visible" style={{ marginTop: 7 }}>
+                    <span style={{ fontSize: '1.4rem' }}>🎬</span>
+                    <span className="preview-name">{editVideoName}</span>
+                    <button className="preview-clear" onClick={() => { setEditVideo(null); setEditVideoName(''); editVideoRef.current.value = ''; }} {...h}>✕</button>
+                  </div>
+                )}
+                {editArt.videoUrl && !editVideoName && (
+                  <label style={{ display:'flex', alignItems:'center', gap:8, marginTop:8, cursor:'none' }}>
+                    <input type="checkbox" checked={removeVideo} onChange={e => setRemoveVideo(e.target.checked)} />
+                    <span className="field-hint">Eliminar video actual</span>
+                  </label>
+                )}
+                <input type="file" ref={editVideoRef} accept="video/*" style={{ display: 'none' }}
+                  onChange={e => { const f = e.target.files[0]; if (!f) return; setEditVideo(f); setEditVideoName(f.name); }} />
               </div>
               <div className="form-divider" />
               <button className="btn-publish" onClick={saveEdit} disabled={saving} {...h}>

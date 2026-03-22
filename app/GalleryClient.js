@@ -132,6 +132,9 @@ export default function GalleryClient({ initialArts }) {
                     <span>Vendida</span>
                   </div>
                 )}
+                {art.videoUrl && !art.sold && (
+                  <div className="card-video-badge">▶ Ver proceso</div>
+                )}
               </div>
               <div className="card-info">
                 <div className="card-text">
@@ -170,6 +173,23 @@ export default function GalleryClient({ initialArts }) {
             <div className="lb-sidebar">
               <h2 className="lb-title">{lightbox.art.title}</h2>
               <p className="lb-desc">{lightbox.art.desc || 'Arte original sobre pizarra, hecho a mano.'}</p>
+
+              {/* VIDEO — only if available */}
+              {lightbox.art.videoUrl && (
+                <div className="lb-video-wrap">
+                  <p className="lb-video-label">
+                    <span>▶</span> Proceso de elaboración
+                  </p>
+                  <video
+                    className="lb-video"
+                    src={lightbox.art.videoUrl}
+                    controls
+                    playsInline
+                    preload="metadata"
+                  />
+                </div>
+              )}
+
               <div className="lb-divider" />
               <div>
                 <a className="btn-lb-wa" href={waLink(lightbox.art)} target="_blank" rel="noopener">

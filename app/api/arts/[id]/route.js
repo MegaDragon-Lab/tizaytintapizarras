@@ -6,14 +6,14 @@ const redis = new Redis({
   token: process.env.KV_REST_API_TOKEN,
 });
 
-// DELETE /api/arts/[id]
 export async function DELETE(request, { params }) {
   try {
     const id = Number(params.id);
     const arts = await redis.lrange('arts', 0, -1);
     const art = arts.find(a => a.id === id);
     if (!art) return Response.json({ error: 'Obra no encontrada' }, { status: 404 });
-    if (art.imgUrl) await del(art.imgUrl);
+    if (art.imgUrl)   await del(art.imgUrl);
+    if (art.videoUrl) await del(art.videoUrl);
     await redis.lrem('arts', 1, art);
     return Response.json({ success: true });
   } catch (error) {
@@ -22,7 +22,6 @@ export async function DELETE(request, { params }) {
   }
 }
 
-// PATCH /api/arts/[id] — edit title/desc/photo or toggle sold
 export async function PATCH(request, { params }) {
   try {
     const id = Number(params.id);
@@ -32,40 +31,44 @@ export async function PATCH(request, { params }) {
 
     const art = arts[index];
     const contentType = request.headers.get('content-type') || '';
-
     let updates = {};
 
     if (contentType.includes('application/json')) {
-      // Toggle sold
       const body = await request.json();
       updates = { sold: body.sold };
     } else {
-      // Edit fields (formData)
       const formData = await request.formData();
       updates.title = formData.get('title') || art.title;
       updates.desc  = formData.get('desc') ?? art.desc;
 
+      // New image
       const newFile = formData.get('file');
       if (newFile && newFile.size > 0) {
-        // Upload new image, delete old one
         const blob = await put(`arts/${Date.now()}-${newFile.name}`, newFile, { access: 'public' });
         if (art.imgUrl) await del(art.imgUrl);
         updates.imgUrl = blob.url;
       }
+
+      // New video
+      const newVideo = formData.get('video');
+      if (newVideo && newVideo.size > 0) {
+        const vBlob = await put(`arts/videos/${Date.now()}-${newVideo.name}`, newVideo, { access: 'public' });
+        if (art.videoUrl) await del(art.videoUrl);
+        updates.videoUrl = vBlob.url;
+      }
+
+      // Remove video flag
+      const removeVideo = formData.get('removeVideo');
+      if (removeVideo === 'true') {
+        if (art.videoUrl) await del(art.videoUrl);
+        updates.videoUrl = null;
+      }
     }
 
     const updated = { ...art, ...updates };
-
-    // Replace in Redis list: remove old, insert updated at same logical position
-    // Since Redis lists don't support index-set easily, we rebuild the list
     const newArts = arts.map(a => a.id === id ? updated : a);
     await redis.del('arts');
-    if (newArts.length > 0) {
-      // rpush to maintain order (list was newest-first from lpush)
-      for (const a of newArts) {
-        await redis.rpush('arts', a);
-      }
-    }
+    for (const a of newArts) await redis.rpush('arts', a);
 
     return Response.json(updated);
   } catch (error) {

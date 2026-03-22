@@ -372,3 +372,55 @@ footer { border-top: 1px solid var(--border); padding: 22px 40px; display: flex;
   color: var(--fg);
 }
 .modal-body { padding: 24px; display: flex; flex-direction: column; gap: 20px; }
+
+/* VIDEO IN LIGHTBOX */
+.lb-video-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.lb-video-label {
+  font-family: var(--font-mono);
+  font-size: .58rem;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.lb-video {
+  width: 100%;
+  border-radius: 2px;
+  border: 1px solid var(--border);
+  background: #000;
+  max-height: 220px;
+  outline: none;
+}
+.lb-video::-webkit-media-controls-panel { background: var(--card-bg); }
+
+/* VIDEO TAG in manage list */
+.video-tag {
+  font-size: .75rem;
+  margin-left: 6px;
+  vertical-align: middle;
+  opacity: .7;
+}
+
+/* VIDEO INDICATOR on card */
+.card-video-badge {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  background: rgba(15,14,12,.75);
+  color: var(--fg);
+  font-size: .6rem;
+  font-family: var(--font-mono);
+  letter-spacing: .08em;
+  padding: 3px 8px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  z-index: 2;
+  backdrop-filter: blur(4px);
+}

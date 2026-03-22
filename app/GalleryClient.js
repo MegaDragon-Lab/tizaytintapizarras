@@ -40,7 +40,7 @@ export default function GalleryClient({ initialArts }) {
       <div id="cursor" className={hover ? 'hover' : ''} style={{ left: cursorPos.x, top: cursorPos.y }} />
 
       <header className="top-bar">
-        <span className="nav-brand">Tiza &amp; Tinta</span>
+        <span className="nav-brand">Tiza &amp; Tinta — Pizarras</span>
         <span className="nav-tagline">Arte sobre pizarra, hecho a mano</span>
       </header>
 

@@ -108,6 +108,7 @@ export default function GalleryClient({ initialArts }) {
                 <div className="card-text">
                   <p className="card-title">{art.title}</p>
                   {art.desc && <p className="card-desc">{art.desc}</p>}
+                  {art.longDesc && <p className="card-long-desc">{art.longDesc}</p>}
                 </div>
                 {!art.sold ? (
                   <a className="btn-wa" href={waLink(art)} target="_blank" rel="noopener"

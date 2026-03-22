@@ -12,11 +12,9 @@ function WaIcon({ size = 11 }) {
   );
 }
 
-function waLink(art, custom = false) {
+function waLink(art) {
   const clean = art.wa.replace(/[^\d+]/g, '');
-  const msg = custom
-    ? encodeURIComponent(`¡Hola! No encontré lo que buscaba en la colección de Tiza & Tinta y me gustaría pedir una obra a medida. ¿Podemos hablar?`)
-    : encodeURIComponent(`¡Hola! Vi tu obra *${art.title}* en Tiza & Tinta y me interesa. ¿Podemos hablar?`);
+  const msg = encodeURIComponent(`¡Hola! Vi tu obra *${art.title}* en Tiza & Tinta y me interesa. ¿Podemos hablar?`);
   return `https://wa.me/${clean}?text=${msg}`;
 }
 
@@ -26,7 +24,6 @@ export default function GalleryClient({ initialArts }) {
   const [cursorPos, setCursorPos] = useState({ x: -100, y: -100 });
   const [hover, setHover] = useState(false);
 
-  // Get first art's wa for custom order CTA (fallback empty)
   const artistWa = arts[0]?.wa || '';
 
   useEffect(() => {
@@ -54,10 +51,7 @@ export default function GalleryClient({ initialArts }) {
 
       {/* HERO */}
       <section className="hero">
-        <div className="hero-title">
-          <span>Tiza</span>
-          <em>&amp; Tinta</em>
-        </div>
+        <div className="hero-title"><span>Tiza</span><em>&amp; Tinta</em></div>
         <div className="hero-right">
           <p className="hero-desc">Arte original sobre pizarra. Cada pieza es única, trazada a mano con tiza y tinta. Disponibles para adquirir.</p>
           <div className="hero-meta">
@@ -92,10 +86,43 @@ export default function GalleryClient({ initialArts }) {
         </div>
         <div className="gallery-grid">
 
-          {/* CARD 1: A MEDIDA — always first */}
+          {arts.length === 0 ? (
+            <div className="empty-state">
+              <span className="empty-num">0</span>
+              <p className="empty-text">Aún no hay obras publicadas</p>
+              <p className="empty-hint">Pronto habrá nuevas piezas disponibles</p>
+            </div>
+          ) : arts.map((art, i) => (
+            <div key={art.id} className={`art-card${art.sold ? ' sold' : ''}`}
+              style={{ animationDelay: `${i * 0.06}s` }}
+              onClick={() => !art.sold && setLightbox({ art, idx: i })} {...h}>
+              <div className="card-img-wrap">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={art.imgUrl} alt={art.title} loading="lazy" />
+                {art.sold && <div className="sold-badge"><span>Vendida</span></div>}
+                {art.videoUrl && !art.sold && <div className="card-video-badge">▶ Ver proceso</div>}
+              </div>
+              <div className="card-info">
+                <div className="card-text">
+                  <p className="card-title">{art.title}</p>
+                  {art.desc && <p className="card-desc">{art.desc}</p>}
+                </div>
+                {!art.sold ? (
+                  <a className="btn-wa" href={waLink(art)} target="_blank" rel="noopener"
+                    onClick={e => e.stopPropagation()} {...h}>
+                    <WaIcon /> Lo quiero
+                  </a>
+                ) : (
+                  <span className="sold-label">Obra vendida</span>
+                )}
+              </div>
+            </div>
+          ))}
+
+          {/* A MEDIDA — always last */}
           {artistWa && (
             <div className="art-card custom-card" {...h}>
-              <div className="card-img-wrap custom-img-wrap">
+              <div className="custom-img-wrap">
                 <div className="custom-bg">
                   <span className="custom-icon">✦</span>
                 </div>
@@ -114,45 +141,6 @@ export default function GalleryClient({ initialArts }) {
               </div>
             </div>
           )}
-
-          {arts.length === 0 ? (
-            <div className="empty-state">
-              <span className="empty-num">0</span>
-              <p className="empty-text">Aún no hay obras publicadas</p>
-              <p className="empty-hint">Pronto habrá nuevas piezas disponibles</p>
-            </div>
-          ) : arts.map((art, i) => (
-            <div key={art.id} className={`art-card${art.sold ? ' sold' : ''}`} style={{ animationDelay: `${i * 0.06}s` }}
-              onClick={() => !art.sold && setLightbox({ art, idx: i })} {...h}>
-              <div className="card-img-wrap">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={art.imgUrl} alt={art.title} loading="lazy" />
-                {art.sold && (
-                  <div className="sold-badge">
-                    <span>Vendida</span>
-                  </div>
-                )}
-                {art.videoUrl && !art.sold && (
-                  <div className="card-video-badge">▶ Ver proceso</div>
-                )}
-              </div>
-              <div className="card-info">
-                <div className="card-text">
-                  <p className="card-title">{art.title}</p>
-                  {art.desc && <p className="card-desc">{art.desc}</p>}
-                </div>
-                {!art.sold && (
-                  <a className="btn-wa" href={waLink(art)} target="_blank" rel="noopener"
-                    onClick={e => e.stopPropagation()} {...h}>
-                    <WaIcon /> Lo quiero
-                  </a>
-                )}
-                {art.sold && (
-                  <span className="sold-label">Obra vendida</span>
-                )}
-              </div>
-            </div>
-          ))}
         </div>
       </section>
 
@@ -173,23 +161,12 @@ export default function GalleryClient({ initialArts }) {
             <div className="lb-sidebar">
               <h2 className="lb-title">{lightbox.art.title}</h2>
               <p className="lb-desc">{lightbox.art.desc || 'Arte original sobre pizarra, hecho a mano.'}</p>
-
-              {/* VIDEO — only if available */}
               {lightbox.art.videoUrl && (
                 <div className="lb-video-wrap">
-                  <p className="lb-video-label">
-                    <span>▶</span> Proceso de elaboración
-                  </p>
-                  <video
-                    className="lb-video"
-                    src={lightbox.art.videoUrl}
-                    controls
-                    playsInline
-                    preload="metadata"
-                  />
+                  <p className="lb-video-label">▶ Proceso de elaboración</p>
+                  <video className="lb-video" src={lightbox.art.videoUrl} controls playsInline preload="metadata" />
                 </div>
               )}
-
               <div className="lb-divider" />
               <div>
                 <a className="btn-lb-wa" href={waLink(lightbox.art)} target="_blank" rel="noopener">

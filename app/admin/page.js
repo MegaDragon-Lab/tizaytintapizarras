@@ -265,7 +265,7 @@ export default function AdminPage() {
 
         {/* MANAGE */}
         <div className="manage-section">
-          <p className="manage-title">Gestionar obras ({loading ? '…' : arts.length})</p>
+          <p className="manage-title">Gestionar obras ({loading ? '…' : arts.length}) · <span style={{opacity:.5,fontWeight:400}}>arrastra para reordenar</span></p>
           {loading ? (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
               {[1,2,3].map(i => <div key={i} className="skeleton" style={{ height: 74 }} />)}
@@ -273,9 +273,34 @@ export default function AdminPage() {
           ) : arts.length === 0 ? (
             <p className="manage-empty">No hay obras publicadas todavía.</p>
           ) : (
-            <div className="manage-list">
-              {arts.map((art) => (
-                <div className="manage-item" key={art.id} {...h}>
+            <div className="manage-list"
+              onDragOver={e => e.preventDefault()}>
+              {arts.map((art, idx) => (
+                <div className="manage-item" key={art.id}
+                  draggable
+                  onDragStart={e => { e.dataTransfer.setData('text/plain', String(art.id)); e.currentTarget.style.opacity = '.4'; }}
+                  onDragEnd={e => { e.currentTarget.style.opacity = '1'; }}
+                  onDrop={async e => {
+                    e.preventDefault();
+                    const draggedId = Number(e.dataTransfer.getData('text/plain'));
+                    if (draggedId === art.id) return;
+                    const newArts = [...arts];
+                    const fromIdx = newArts.findIndex(a => a.id === draggedId);
+                    const [moved] = newArts.splice(fromIdx, 1);
+                    newArts.splice(idx, 0, moved);
+                    setArts(newArts);
+                    try {
+                      await fetch('/api/arts/reorder', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ ids: newArts.map(a => a.id) }),
+                      });
+                      showToast('Orden guardado');
+                    } catch { showToast('Error al guardar orden', 'error'); }
+                  }}
+                  style={{ cursor: 'grab' }}
+                  {...h}>
+                  <span style={{ color: 'var(--muted)', fontFamily: 'var(--font-mono)', fontSize: '.7rem', userSelect: 'none', paddingRight: 4 }}>⠿</span>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img className="manage-thumb" src={art.imgUrl} alt={art.title} style={{ opacity: art.sold ? .5 : 1 }} />
                   <div className="manage-info">

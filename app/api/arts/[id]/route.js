@@ -1,30 +1,30 @@
-import { kv } from '@vercel/kv';
+import { Redis } from '@upstash/redis';
 import { del } from '@vercel/blob';
 
-// DELETE /api/arts/[id]
+const redis = new Redis({
+  url: process.env.KV_REST_API_URL,
+  token: process.env.KV_REST_API_TOKEN,
+});
+
 export async function DELETE(request, { params }) {
   try {
     const id = Number(params.id);
-
-    // Find the art in the KV list
-    const arts = await kv.lrange('arts', 0, -1);
+    const arts = await redis.lrange('arts', 0, -1);
     const art = arts.find(a => a.id === id);
 
     if (!art) {
       return Response.json({ error: 'Obra no encontrada' }, { status: 404 });
     }
 
-    // Delete image from Vercel Blob
     if (art.imgUrl) {
       await del(art.imgUrl);
     }
 
-    // Remove from KV list (lrem removes all occurrences matching value)
-    await kv.lrem('arts', 1, art);
+    await redis.lrem('arts', 1, art);
 
     return Response.json({ success: true });
   } catch (error) {
-    console.error('DELETE /api/arts/[id] error:', error);
+    console.error('DELETE error:', error);
     return Response.json({ error: 'Error al eliminar la obra' }, { status: 500 });
   }
 }

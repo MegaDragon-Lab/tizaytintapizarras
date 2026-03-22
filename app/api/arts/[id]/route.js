@@ -38,8 +38,9 @@ export async function PATCH(request, { params }) {
       updates = { sold: body.sold };
     } else {
       const formData = await request.formData();
-      updates.title = formData.get('title') || art.title;
-      updates.desc  = formData.get('desc') ?? art.desc;
+      updates.title    = formData.get('title') || art.title;
+      updates.desc     = formData.get('desc') ?? art.desc;
+      updates.longDesc = formData.get('longDesc') ?? art.longDesc ?? '';
 
       // New image
       const newFile = formData.get('file');

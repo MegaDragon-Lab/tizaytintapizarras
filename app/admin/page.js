@@ -9,6 +9,7 @@ export default function AdminPage() {
   const [waNumber, setWaNumber] = useState('');
   const [title, setTitle] = useState('');
   const [desc, setDesc] = useState('');
+  const [longDesc, setLongDesc] = useState('');
   const [file, setFile] = useState(null);
   const [previewSrc, setPreviewSrc] = useState(null);
   const [previewName, setPreviewName] = useState('');
@@ -23,6 +24,7 @@ export default function AdminPage() {
   const [editArt, setEditArt] = useState(null);
   const [editTitle, setEditTitle] = useState('');
   const [editDesc, setEditDesc] = useState('');
+  const [editLongDesc, setEditLongDesc] = useState('');
   const [editFile, setEditFile] = useState(null);
   const [editPreview, setEditPreview] = useState(null);
   const [editVideo, setEditVideo] = useState(null);
@@ -94,6 +96,7 @@ export default function AdminPage() {
       fd.append('file', file);
       fd.append('title', title.trim());
       fd.append('desc', desc.trim());
+      fd.append('longDesc', longDesc.trim());
       fd.append('wa', waNumber.replace(/\s+/g, ''));
       if (video) fd.append('video', video);
       setProgress(50);
@@ -102,7 +105,7 @@ export default function AdminPage() {
       if (!res.ok) throw new Error();
       const newArt = await res.json();
       setArts(prev => [newArt, ...prev]);
-      setTitle(''); setDesc(''); setFile(null); setPreviewSrc(null); setPreviewName('');
+      setTitle(''); setDesc(''); setLongDesc(''); setFile(null); setPreviewSrc(null); setPreviewName('');
       setVideo(null); setVideoName('');
       if (fileInputRef.current) fileInputRef.current.value = '';
       if (videoInputRef.current) videoInputRef.current.value = '';
@@ -137,7 +140,7 @@ export default function AdminPage() {
   }
 
   function openEdit(art) {
-    setEditArt(art); setEditTitle(art.title); setEditDesc(art.desc || '');
+    setEditArt(art); setEditTitle(art.title); setEditDesc(art.desc || ''); setEditLongDesc(art.longDesc || '');
     setEditFile(null); setEditPreview(null);
     setEditVideo(null); setEditVideoName(''); setRemoveVideo(false);
   }
@@ -149,6 +152,7 @@ export default function AdminPage() {
       const fd = new FormData();
       fd.append('title', editTitle.trim());
       fd.append('desc', editDesc.trim());
+      fd.append('longDesc', editLongDesc.trim());
       if (editFile) fd.append('file', editFile);
       if (editVideo) fd.append('video', editVideo);
       if (removeVideo) fd.append('removeVideo', 'true');
@@ -206,9 +210,15 @@ export default function AdminPage() {
               value={title} onChange={e => setTitle(e.target.value)} {...h} />
           </div>
           <div className="field">
-            <label className="field-label" htmlFor="desc">Descripción <span style={{ opacity: .5 }}>(opcional)</span></label>
+            <label className="field-label" htmlFor="desc">Descripción corta <span style={{ opacity: .5 }}>(opcional)</span></label>
             <input type="text" className="field-input" id="desc" placeholder="Dimensiones, técnica, materiales..."
               value={desc} onChange={e => setDesc(e.target.value)} {...h} />
+          </div>
+          <div className="field">
+            <label className="field-label" htmlFor="longDesc">Descripción completa <span style={{ opacity: .5 }}>(opcional)</span></label>
+            <textarea className="field-textarea" id="longDesc"
+              placeholder="Cuéntanos la historia de esta obra, la técnica utilizada, la inspiración, el tiempo de elaboración..."
+              value={longDesc} onChange={e => setLongDesc(e.target.value)} {...h} />
           </div>
 
           {/* IMAGE */}
@@ -346,9 +356,15 @@ export default function AdminPage() {
                   onChange={e => setEditTitle(e.target.value)} {...h} />
               </div>
               <div className="field">
-                <label className="field-label">Descripción</label>
+                <label className="field-label">Descripción corta</label>
                 <input type="text" className="field-input" value={editDesc}
                   onChange={e => setEditDesc(e.target.value)} placeholder="Dimensiones, técnica..." {...h} />
+              </div>
+              <div className="field">
+                <label className="field-label">Descripción completa <span style={{ opacity: .5 }}>(opcional)</span></label>
+                <textarea className="field-textarea" value={editLongDesc}
+                  onChange={e => setEditLongDesc(e.target.value)}
+                  placeholder="Historia de la obra, técnica, inspiración..." {...h} />
               </div>
               <div className="field">
                 <label className="field-label">Cambiar foto <span style={{ opacity: .5 }}>(opcional)</span></label>

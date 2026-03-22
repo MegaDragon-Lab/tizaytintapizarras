@@ -160,7 +160,9 @@ export default function GalleryClient({ initialArts }) {
             </div>
             <div className="lb-sidebar">
               <h2 className="lb-title">{lightbox.art.title}</h2>
-              <p className="lb-desc">{lightbox.art.desc || 'Arte original sobre pizarra, hecho a mano.'}</p>
+              {lightbox.art.desc && <p className="lb-desc" style={{fontFamily:'var(--font-mono)',fontSize:'.6rem',letterSpacing:'.1em',textTransform:'uppercase',color:'var(--muted)'}}>{lightbox.art.desc}</p>}
+              {lightbox.art.longDesc && <p className="lb-desc">{lightbox.art.longDesc}</p>}
+              {!lightbox.art.longDesc && !lightbox.art.desc && <p className="lb-desc">Arte original sobre pizarra, hecho a mano.</p>}
               {lightbox.art.videoUrl && (
                 <div className="lb-video-wrap">
                   <p className="lb-video-label">▶ Proceso de elaboración</p>

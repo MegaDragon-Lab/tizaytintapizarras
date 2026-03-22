@@ -20,19 +20,18 @@ export async function POST(request) {
   try {
     const formData = await request.formData();
     const file    = formData.get('file');
-    const video   = formData.get('video');   // optional
+    const video   = formData.get('video');
     const title   = formData.get('title');
     const desc    = formData.get('desc') || '';
+    const longDesc = formData.get('longDesc') || '';
     const wa      = formData.get('wa');
 
     if (!file || !title || !wa) {
       return Response.json({ error: 'Faltan campos requeridos' }, { status: 400 });
     }
 
-    // Upload image
     const blob = await put(`arts/${Date.now()}-${file.name}`, file, { access: 'public' });
 
-    // Upload video if provided
     let videoUrl = null;
     if (video && video.size > 0) {
       const vBlob = await put(`arts/videos/${Date.now()}-${video.name}`, video, { access: 'public' });
@@ -43,6 +42,7 @@ export async function POST(request) {
       id: Date.now(),
       title,
       desc,
+      longDesc,
       wa,
       imgUrl: blob.url,
       videoUrl,

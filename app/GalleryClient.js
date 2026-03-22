@@ -51,7 +51,9 @@ export default function GalleryClient({ initialArts }) {
 
       {/* HERO */}
       <section className="hero">
-        <div className="hero-title"><span>Tiza</span><em>&amp; Tinta</em></div>
+        <div className="hero-title">
+          Tiza &amp; Tinta — Pizarras
+        </div>
         <div className="hero-right">
           <p className="hero-desc">Arte original sobre pizarra. Cada pieza es única, trazada a mano con tiza y tinta. Disponibles para adquirir.</p>
           <div className="hero-meta">

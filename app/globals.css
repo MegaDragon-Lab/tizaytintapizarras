@@ -267,6 +267,13 @@ footer { border-top: 1px solid var(--border); padding: 22px 40px; display: flex;
   .admin-page { padding: 40px 20px 80px }
   .ig-banner { padding: 0 20px }
   .ig-divider { display: none }
+  .ig-content { gap: 14px; padding: 18px 0; }
+  .ig-icon { width: 38px; height: 38px; border-radius: 10px; flex-shrink: 0; }
+  .ig-icon svg { width: 18px; height: 18px; }
+  .ig-title { font-size: 1rem; }
+  .ig-label { display: none; }
+  .ig-cta { font-size: .52rem; padding: 8px 12px; letter-spacing: .1em; gap: 5px; }
+  .ig-cta svg { width: 10px; height: 10px; }
   footer { flex-direction: column; gap: 6px; text-align: center; padding: 18px }
 }
 

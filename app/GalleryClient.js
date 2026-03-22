@@ -44,7 +44,11 @@ export default function GalleryClient({ initialArts }) {
       <div id="cursor" className={hover ? 'hover' : ''} style={{ left: cursorPos.x, top: cursorPos.y }} />
 
       <header className="top-bar">
-        <span className="nav-brand">Tiza &amp; Tinta — Pizarras</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo.jpg" alt="Tiza & Tinta" style={{ width: 38, height: 38, borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(250,250,249,.2)' }} />
+          <span className="nav-brand">Tiza &amp; Tinta — Pizarras</span>
+        </div>
         <span className="nav-tagline">Arte sobre pizarra, hecho a mano</span>
       </header>
 

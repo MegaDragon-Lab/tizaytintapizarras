@@ -52,7 +52,7 @@ export default function LoginPage() {
       <div id="cursor" className={hover ? 'hover' : ''} style={{ left: cursorPos.x, top: cursorPos.y }} />
 
       <header className="top-bar">
-        <span className="nav-brand">Tiza &amp; Tinta — Pizarras</span>
+        <span style={{display:"flex",alignItems:"center",gap:12}}><img src="/logo.jpg" alt="Logo" style={{width:38,height:38,borderRadius:"50%",objectFit:"cover",border:"1px solid rgba(250,250,249,.2)"}}/><span className="nav-brand">Tiza &amp; Tinta — Pizarras</span></span>
       </header>
 
       <main style={{

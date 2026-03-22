@@ -96,9 +96,11 @@ export default function GalleryClient({ initialArts }) {
           ) : arts.map((art, i) => (
             <div key={art.id} className="art-card" style={{ animationDelay: `${i * 0.06}s` }}
               onClick={() => setLightbox({ art, idx: i })} {...h}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={art.imgUrl} alt={art.title} loading="lazy" />
-              <span className="card-num">{String(i + 1).padStart(2, '0')}</span>
+              <div className="card-img-wrap">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={art.imgUrl} alt={art.title} loading="lazy" />
+                <span className="card-num">{String(i + 1).padStart(2, '0')}</span>
+              </div>
               <div className="card-info">
                 <div className="card-text">
                   <p className="card-title">{art.title}</p>

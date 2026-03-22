@@ -3,8 +3,8 @@ export const metadata = {
   title: 'Tiza & Tinta — Pizarras',
   description: 'Arte original sobre pizarra, hecho a mano.',
   icons: {
-    icon: '/logo.jpg',
-    apple: '/logo.jpg',
+    icon: '/favicon.png',
+    apple: '/favicon.png',
   },
 };
 export default function RootLayout({ children }) {

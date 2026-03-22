@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 export default function AdminPage() {
   const [arts, setArts] = useState([]);
@@ -18,6 +19,12 @@ export default function AdminPage() {
   const [cursorPos, setCursorPos] = useState({ x: -100, y: -100 });
   const fileInputRef = useRef();
   const dropRef = useRef();
+  const router = useRouter();
+
+  async function logout() {
+    await fetch('/api/admin-login', { method: 'DELETE' });
+    router.push('/admin/login');
+  }
 
   useEffect(() => {
     fetchArts();
@@ -123,7 +130,10 @@ export default function AdminPage() {
       <header className="top-bar">
         <span className="nav-brand">Tiza &amp; Tinta</span>
         <span className="nav-tagline">Panel del artista</span>
-        <Link className="nav-action" href="/" {...h}>← Ver galería</Link>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <Link className="nav-action" href="/" {...h}>← Ver galería</Link>
+          <button className="nav-action" onClick={logout} {...h}>Salir</button>
+        </div>
       </header>
 
       <main className="admin-page">

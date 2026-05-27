@@ -50,18 +50,39 @@ export default function GalleryClient({ initialArts }) {
       </header>
 
       {/* HERO */}
-      <section className="hero">
-        <div className="hero-title">
-          Tiza &amp; Tinta — Pizarras
-        </div>
-        <div className="hero-right">
-          <p className="hero-desc">Arte original sobre pizarra. Cada pieza es única, trazada a mano con tiza y tinta. Disponibles para adquirir.</p>
-          <div className="hero-meta">
-            <div className="meta-item"><span className="meta-count">{arts.length}</span>Obras</div>
-            <div className="meta-item"><span className="meta-count">100%</span>Hecho a mano</div>
-          </div>
-        </div>
-      </section>
+<section className="hero">
+  <div className="hero-title">
+    Tiza &amp; Tinta — Pizarras
+  </div>
+
+  <div className="hero-right">
+    <p className="hero-desc">
+      Convierte cualquier espacio en algo único con pizarras artísticas hechas a mano.
+    </p>
+
+    <p className="hero-desc">
+      Diseños personalizados para negocios, eventos y hogar. <br />
+      Perfectas para decorar, informar… o ambas cosas a la vez.
+    </p>
+
+    <p className="hero-desc">
+      Da vida a tu idea con una pizarra creada especialmente para ti. <br />
+      Haz tu pedido y crea algo diferente.
+    </p>
+
+    <div className="hero-meta">
+      <div className="meta-item">
+        <span className="meta-count">{arts.length}</span>
+        Obras
+      </div>
+
+      <div className="meta-item">
+        <span className="meta-count">100%</span>
+        Hecho a mano
+      </div>
+    </div>
+  </div>
+</section>
 
       {/* INSTAGRAM BANNER */}
       <div className="ig-banner">

@@ -66,7 +66,6 @@ export default function GalleryClient({ initialArts }) {
     </p>
 
     <p className="hero-desc">
-      Da vida a tu idea con una pizarra creada especialmente para ti. <br />
       Haz tu pedido y crea algo diferente.
     </p>
 
